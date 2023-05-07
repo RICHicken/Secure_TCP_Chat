@@ -18,8 +18,6 @@ import (
 )
 
 const (
-	SERVER_HOST = "localhost"
-	SERVER_PORT = "9988"
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
 )
@@ -58,8 +56,6 @@ func main() {
 		}
 		server, err = net.Dial(SERVER_TYPE, serverIP)
 	}
-
-	// server, err = net.Dial(SERVER_TYPE, SERVER_HOST+":"+SERVER_PORT)
 
 	buffer = make([]byte, BUFFER_SIZE)
 
@@ -153,6 +149,8 @@ func main() {
 					fmt.Print(" ")
 					mBufPos++
 				}
+			case keyboard.KeyCtrlC:
+				return
 			}
 			mutex.Unlock()
 		}
@@ -161,8 +159,6 @@ func main() {
 
 		// What...
 		sendMessage(string(encrypt([]byte(string(messageBuf[:mBufPos])))))
-		// sendMessage(string(string(messageBuf[bufStart:mBufPos])))
-
 		// print newline because we pushed enter
 		fmt.Println()
 
@@ -215,6 +211,7 @@ func receiveMessage() (string, int) {
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 		mLen = 0
+		return "", 0
 	}
 
 	// Get the number of expected bytes (at the beginning of the message)
@@ -235,6 +232,7 @@ func receiveMessage() (string, int) {
 		if err != nil {
 			fmt.Println("Error reading:", err.Error())
 			mLen = 0
+			return "", 0
 		}
 
 		message += string(buffer[:mLen])
