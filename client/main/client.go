@@ -36,6 +36,7 @@ var serverKey *rsa.PublicKey
 
 var maxMsgSize int
 var name string
+var nameLen int
 
 func main() {
 	var err error
@@ -101,6 +102,7 @@ func main() {
 
 	// Save name in local buffer
 	name = inText + ": "
+	nameLen = len(name)
 
 	// Now set up, time for messaging
 
@@ -182,14 +184,15 @@ func receiveAndPrint() {
 		// When we get a message
 		rawmessage, mLen := receiveMessage()
 		message := string(decrypt([]byte(rawmessage)))
+		mLen = len(message)
 		mutex.Lock()
 
 		// Print the message
 		fmt.Print("\r" + message)
 
 		// Clear any extra part of the line
-		if mLen < mBufPos {
-			fmt.Print(strings.Repeat(" ", mBufPos-mLen))
+		if mLen < (mBufPos + nameLen) {
+			fmt.Print(strings.Repeat(" ", (mBufPos+nameLen)-mLen))
 		}
 
 		fmt.Println()
