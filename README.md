@@ -5,6 +5,7 @@ This is a simple TCP chat program where clients can connect to a server. Message
 
 ## How to use
 This *should* be able to build to any platform supported by go, I know it works on Windows and Linux.
+Please Note: this has mainly been tested for windows, there may be unexpected problems for other platforms (including linux)
 
 ### Server
 1. You will be prompted to specify a port number.
