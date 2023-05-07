@@ -7,8 +7,9 @@ This is a simple TCP chat program where clients can connect to a server. Message
 This *should* be able to build to any platform supported by go, I know it works on Windows and Linux.
 
 ### Server
-1. You will be prompted to specify the maximum number of characters allowed.
-2. After a valid number has been given, the server should be up and running on `localhost:9988`
+1. You will be prompted to specify a port number.
+2. After a valid port has been given, You will be prompted to specify the maximum number of characters allowed.
+3. After a valid number has been given, the server should be up and running on `localhost:{port}}`
 
 ### Client
 1. You will be prompted to type an IP.

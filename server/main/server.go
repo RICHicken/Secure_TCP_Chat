@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"strconv"
@@ -18,7 +17,6 @@ import (
 
 const (
 	SERVER_HOST = "localhost"
-	SERVER_PORT = "9988"
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
 )
@@ -35,6 +33,7 @@ var privateKey *rsa.PrivateKey
 var publicKey rsa.PublicKey
 
 var msgLenStr string
+var port string
 
 func main() {
 	fmt.Println("Performing Setup...")
@@ -42,9 +41,35 @@ func main() {
 	var err error = nil
 	var msgLen int = 0
 
+	scanner := bufio.NewScanner(os.Stdin)
+
+	// Set the port number
+	for {
+		fmt.Print("Type Port Number (or press enter for default): ")
+		if scanner.Scan() {
+			port = scanner.Text()
+		}
+
+		portNum, err := strconv.Atoi(port)
+
+		// Check if it is a number
+		if err != nil {
+			fmt.Println("Error getting number. Try again")
+			continue
+		}
+
+		// Make sure it is a valid port
+		if portNum > 65535 || portNum < 1 {
+			fmt.Println("Not a valid port number. Try again")
+			continue
+		}
+
+		break
+	}
+
+	// Set the maximum allowed message length
 	for err != nil || msgLen <= 1 {
 		fmt.Print("Type Max Message Length: ")
-		scanner := bufio.NewScanner(os.Stdin)
 		if scanner.Scan() {
 			msgLenStr = scanner.Text()
 		}
@@ -61,15 +86,16 @@ func main() {
 	publicKey = privateKey.PublicKey
 
 	fmt.Println("Server Running...")
+
 	// Create server
-	server, err := net.Listen(SERVER_TYPE, SERVER_HOST+":"+SERVER_PORT)
+	server, err := net.Listen(SERVER_TYPE, SERVER_HOST+":"+port)
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
 		os.Exit(1)
 	}
 	defer server.Close()
 
-	fmt.Println("Listening on " + SERVER_HOST + ":" + SERVER_PORT)
+	fmt.Println("Listening on " + SERVER_HOST + ":" + port)
 	fmt.Println("Waiting for client...")
 
 	// Check for connections
@@ -185,11 +211,7 @@ func receiveMessage(connection *net.Conn, buffer []byte) (string, int, bool) {
 
 	mLen, err := (*connection).Read(buffer)
 	if err != nil {
-		if err == io.EOF || err == net.ErrClosed {
-			fmt.Println("Client closed the connection")
-			return "", 0, true
-		}
-		fmt.Println("Error reading:", err.Error())
+		fmt.Println("Error reading:", err)
 		return "", 0, true
 	}
 
@@ -209,7 +231,7 @@ func receiveMessage(connection *net.Conn, buffer []byte) (string, int, bool) {
 	for bytesRead < expectedBytes {
 		mLen, err = (*connection).Read(buffer)
 		if err != nil {
-			fmt.Println("Error reading:", err.Error())
+			fmt.Println("Error reading:", err)
 			mLen = 0
 		}
 
